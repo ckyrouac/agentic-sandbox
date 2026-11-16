@@ -1,0 +1,36 @@
+name: agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        type: string
+        required: true
+
+permissions: {}
+
+concurrency:
+  group: agent-${{ github.workflow }}
+
+jobs:
+  run:
+    uses: cgwalters-forge/agentic-job/.github/workflows/agentic-job.yml@ac4c8ce0e6f068f9a0eb41755a5b7cfb70776f6b
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+      actions: read
+      id-token: write
+    secrets:
+      SAFE_OUTPUTS_PAT: ${{ secrets.SAFE_OUTPUTS_PAT }}
+    with:
+      id: ${{ github.run_id }}
+      task: ${{ inputs.task }}
+      repo: ckyrouac/agentic-sandbox
+      base: main
+      outputs: create_pull_request,noop
+      allow: .github/agentic-job/allow.toml
+      config: .agentic-job-source/docs/examples/hosted.toml
+      apply-environment: agent-apply
+      agent: fake
+      max-requests: "0"
